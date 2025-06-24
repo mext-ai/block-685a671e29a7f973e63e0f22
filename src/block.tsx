@@ -575,29 +575,6 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
         </div>
       )}
 
-      {/* Instructions de jeu en cours - coin bas */}
-      {gameState === 'playing' && (
-        <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 10,
-          textAlign: 'center',
-          fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
-          padding: '15px 25px',
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          borderRadius: '12px',
-          border: '2px solid rgba(255, 215, 0, 0.5)',
-          maxWidth: '90vw'
-        }}>
-          <div style={{ marginBottom: '8px', fontSize: '1.5rem' }}>⚡</div>
-          <div style={{ color: '#FFD700', fontWeight: 'bold' }}>
-            Frappez le côté gauche → ballon va à droite !
-          </div>
-        </div>
-      )}
-
       {/* Animations CSS */}
       <style>{`
         @keyframes bounce {
