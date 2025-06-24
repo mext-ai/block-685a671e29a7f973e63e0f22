@@ -8,6 +8,7 @@ interface Ball {
   x: number;
   y: number;
   velocityY: number;
+  velocityX: number; // Nouvelle propriété pour la vélocité horizontale
   radius: number;
 }
 
@@ -22,11 +23,14 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     x: 400,
     y: 100,
     velocityY: 0,
+    velocityX: 0, // Initialiser la vélocité horizontale
     radius: 30
   });
 
   const GRAVITY = 0.5;
   const JUMP_FORCE = -12;
+  const HORIZONTAL_DAMPING = 0.98; // Amortissement horizontal pour réalisme
+  const MAX_HORIZONTAL_VELOCITY = 8; // Vitesse horizontale maximale
 
   // Fonction pour ajuster la taille du canvas à l'écran
   const updateCanvasSize = useCallback(() => {
@@ -63,6 +67,7 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
       x: canvasSize.width / 2,
       y: 100,
       velocityY: 2,
+      velocityX: 0,
       radius: 30
     });
     
@@ -78,6 +83,7 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
       x: canvasSize.width / 2,
       y: 100,
       velocityY: 0,
+      velocityX: 0,
       radius: 30
     });
   }, [canvasSize.width]);
@@ -102,9 +108,14 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     );
 
     if (distance <= ball.radius + 20) { // Zone de clic un peu plus large
+      // Calculer la direction horizontale basée sur où on clique par rapport au centre du ballon
+      const horizontalOffset = clickX - ball.x; // Distance du clic par rapport au centre du ballon
+      const horizontalForce = (horizontalOffset / ball.radius) * MAX_HORIZONTAL_VELOCITY;
+      
       setBall(prevBall => ({
         ...prevBall,
-        velocityY: JUMP_FORCE
+        velocityY: JUMP_FORCE,
+        velocityX: Math.max(-MAX_HORIZONTAL_VELOCITY, Math.min(MAX_HORIZONTAL_VELOCITY, horizontalForce))
       }));
       setScore(prevScore => prevScore + 1);
     }
@@ -121,6 +132,12 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
         // Appliquer la gravité
         newBall.velocityY += GRAVITY;
         newBall.y += newBall.velocityY;
+        
+        // Appliquer le mouvement horizontal
+        newBall.x += newBall.velocityX;
+        
+        // Appliquer l'amortissement horizontal pour plus de réalisme
+        newBall.velocityX *= HORIZONTAL_DAMPING;
 
         // Vérifier si le ballon touche le sol
         if (newBall.y + newBall.radius >= GROUND_Y) {
@@ -143,11 +160,13 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
           return newBall;
         }
 
-        // Garder le ballon dans les limites horizontales
+        // Rebondir sur les murs latéraux avec perte d'énergie
         if (newBall.x - newBall.radius < 0) {
           newBall.x = newBall.radius;
+          newBall.velocityX = -newBall.velocityX * 0.7; // Rebond avec perte d'énergie
         } else if (newBall.x + newBall.radius > canvasSize.width) {
           newBall.x = canvasSize.width - newBall.radius;
+          newBall.velocityX = -newBall.velocityX * 0.7; // Rebond avec perte d'énergie
         }
 
         return newBall;
@@ -198,17 +217,21 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     ctx.lineTo(canvasSize.width, GROUND_Y);
     ctx.stroke();
 
-    // Dessiner le ballon de football
-    const ballGradient = ctx.createRadialGradient(
-      ball.x - 10, ball.y - 10, 0,
-      ball.x, ball.y, ball.radius
-    );
+    // Dessiner le ballon de football avec rotation basée sur la vélocité
+    ctx.save();
+    ctx.translate(ball.x, ball.y);
+    
+    // Rotation du ballon basée sur la vélocité horizontale pour plus de réalisme
+    const rotationAngle = (ball.velocityX * 0.1) % (Math.PI * 2);
+    ctx.rotate(rotationAngle);
+    
+    const ballGradient = ctx.createRadialGradient(-10, -10, 0, 0, 0, ball.radius);
     ballGradient.addColorStop(0, '#FFFFFF');
     ballGradient.addColorStop(1, '#000000');
     
     ctx.fillStyle = ballGradient;
     ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.arc(0, 0, ball.radius, 0, Math.PI * 2);
     ctx.fill();
 
     // Dessiner les motifs du ballon
@@ -217,15 +240,39 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     // Pentagones
     for (let i = 0; i < 5; i++) {
       const angle = (i * Math.PI * 2) / 5;
-      const x1 = ball.x + Math.cos(angle) * (ball.radius * 0.3);
-      const y1 = ball.y + Math.sin(angle) * (ball.radius * 0.3);
-      const x2 = ball.x + Math.cos(angle + Math.PI * 2/5) * (ball.radius * 0.3);
-      const y2 = ball.y + Math.sin(angle + Math.PI * 2/5) * (ball.radius * 0.3);
+      const x1 = Math.cos(angle) * (ball.radius * 0.3);
+      const y1 = Math.sin(angle) * (ball.radius * 0.3);
+      const x2 = Math.cos(angle + Math.PI * 2/5) * (ball.radius * 0.3);
+      const y2 = Math.sin(angle + Math.PI * 2/5) * (ball.radius * 0.3);
       
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
       ctx.stroke();
+    }
+    
+    ctx.restore();
+
+    // Afficher un indicateur visuel de la direction si le ballon bouge horizontalement
+    if (gameState === 'playing' && Math.abs(ball.velocityX) > 0.5) {
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 5]);
+      
+      const arrowLength = Math.min(50, Math.abs(ball.velocityX) * 8);
+      const arrowDirection = ball.velocityX > 0 ? 1 : -1;
+      
+      ctx.beginPath();
+      ctx.moveTo(ball.x, ball.y - ball.radius - 10);
+      ctx.lineTo(ball.x + (arrowLength * arrowDirection), ball.y - ball.radius - 10);
+      
+      // Pointe de flèche
+      ctx.lineTo(ball.x + (arrowLength * arrowDirection) - (10 * arrowDirection), ball.y - ball.radius - 15);
+      ctx.moveTo(ball.x + (arrowLength * arrowDirection), ball.y - ball.radius - 10);
+      ctx.lineTo(ball.x + (arrowLength * arrowDirection) - (10 * arrowDirection), ball.y - ball.radius - 5);
+      
+      ctx.stroke();
+      ctx.setLineDash([]);
     }
 
   }, [ball, gameState, canvasSize, GROUND_Y]);
@@ -375,6 +422,7 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
             }}>
               🎯 <strong>OBJECTIF :</strong> Gardez le ballon en l'air !<br/>
               👆 <strong>CONTRÔLES :</strong> Cliquez sur le ballon pour le faire rebondir<br/>
+              🎮 <strong>TECHNIQUE :</strong> Cliquez à gauche/droite du centre pour diriger le ballon<br/>
               🏆 <strong>DÉFI :</strong> Évitez que le ballon touche le sol !
             </p>
           </div>
@@ -523,7 +571,7 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
         }}>
           <div style={{ marginBottom: '8px', fontSize: '1.5rem' }}>⚡</div>
           <div style={{ color: '#FFD700', fontWeight: 'bold' }}>
-            Cliquez sur le ballon pour le faire rebondir !
+            Cliquez à gauche/droite du centre pour diriger le ballon !
           </div>
         </div>
       )}
