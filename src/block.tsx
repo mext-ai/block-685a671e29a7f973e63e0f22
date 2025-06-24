@@ -109,8 +109,8 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     );
 
     // Le ballon est cliquable tant qu'il n'a pas touché le sol ET qu'on clique dans sa zone
-    // Zone de clic élargie pour une meilleure jouabilité
-    const clickRadius = ball.radius + 30; // Zone de clic plus large
+    // Zone de clic élargie pour une meilleure jouabilité - AUGMENTÉE de 30 à 40
+    const clickRadius = ball.radius + 40; // Zone de clic encore plus large
     const ballHasTouchedGround = (ball.y + ball.radius) >= GROUND_Y;
 
     if (distance <= clickRadius && !ballHasTouchedGround) {
@@ -264,13 +264,13 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     ctx.restore();
 
     // Dessiner un indicateur visuel de la zone de clic si le jeu est en cours
-    // et si le ballon est proche du sol pour aider le joueur
+    // et si le ballon est proche du sol pour aider le joueur - MISE À JOUR pour refléter la nouvelle taille
     if (gameState === 'playing' && (ball.y + ball.radius) > (GROUND_Y - 100)) {
       ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
       ctx.lineWidth = 2;
       ctx.setLineDash([5, 5]);
       ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.radius + 30, 0, Math.PI * 2);
+      ctx.arc(ball.x, ball.y, ball.radius + 40, 0, Math.PI * 2); // Mis à jour pour correspondre à la zone de clic
       ctx.stroke();
       ctx.setLineDash([]);
     }
