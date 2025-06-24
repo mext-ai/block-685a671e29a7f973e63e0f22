@@ -206,127 +206,295 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+      justifyContent: 'center',
       minHeight: '100vh',
-      backgroundColor: '#1a1a2e',
+      background: 'linear-gradient(135deg, #2E8B57 0%, #228B22 50%, #006400 100%)',
       color: 'white',
-      fontFamily: 'Arial, sans-serif',
-      padding: '20px'
+      fontFamily: "'Arial Black', Arial, sans-serif",
+      padding: '20px',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
-      <h1 style={{
-        fontSize: '2.5rem',
-        marginBottom: '10px',
-        textAlign: 'center',
-        background: 'linear-gradient(45deg, #FFD700, #FFA500)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
-      }}>
-        ⚽ {title} ⚽
-      </h1>
-
+      {/* Effet de terrain en arrière-plan */}
       <div style={{
-        fontSize: '1.5rem',
-        marginBottom: '20px',
-        padding: '10px 20px',
-        backgroundColor: '#16213e',
-        borderRadius: '10px',
-        border: '2px solid #FFD700'
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundImage: `
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 95px,
+            rgba(255, 255, 255, 0.1) 95px,
+            rgba(255, 255, 255, 0.1) 100px
+          ),
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 95px,
+            rgba(255, 255, 255, 0.1) 95px,
+            rgba(255, 255, 255, 0.1) 100px
+          )
+        `,
+        opacity: 0.3,
+        zIndex: 0
+      }}></div>
+
+      <div style={{ 
+        zIndex: 1, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        alignItems: 'center',
+        maxWidth: '900px',
+        width: '100%'
       }}>
-        Score: {score} point{score !== 1 ? 's' : ''}
+        {/* Titre principal avec style stade */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: '30px',
+          padding: '20px',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          borderRadius: '20px',
+          border: '3px solid #FFD700',
+          boxShadow: '0 0 30px rgba(255, 215, 0, 0.5)',
+          backdropFilter: 'blur(10px)'
+        }}>
+          <h1 style={{
+            fontSize: '3.5rem',
+            margin: '0 0 10px 0',
+            background: 'linear-gradient(45deg, #FFD700, #FFA500, #FF6347)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 0 20px rgba(255, 215, 0, 0.8)',
+            letterSpacing: '2px',
+            fontWeight: 'bold'
+          }}>
+            ⚽ FOOTBALL JUGGLING ⚽
+          </h1>
+          <div style={{
+            fontSize: '1.2rem',
+            color: '#FFD700',
+            fontStyle: 'italic',
+            textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
+          }}>
+            🏆 Championship Edition 🏆
+          </div>
+        </div>
+
+        {/* Panneau de score */}
+        <div style={{
+          fontSize: '1.8rem',
+          marginBottom: '30px',
+          padding: '15px 30px',
+          background: 'linear-gradient(45deg, #1a1a2e, #16213e)',
+          borderRadius: '15px',
+          border: '3px solid #FFD700',
+          boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
+          minWidth: '200px',
+          textAlign: 'center'
+        }}>
+          <div style={{ color: '#FFD700', fontSize: '1rem', marginBottom: '5px' }}>SCORE</div>
+          <div style={{ fontWeight: 'bold', color: '#FFFFFF' }}>
+            {score} point{score !== 1 ? 's' : ''}
+          </div>
+        </div>
+
+        {gameState === 'waiting' && (
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '30px',
+            padding: '30px',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            borderRadius: '20px',
+            border: '2px solid rgba(255, 215, 0, 0.8)',
+            maxWidth: '600px',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+          }}>
+            <div style={{
+              fontSize: '4rem',
+              marginBottom: '20px',
+              animation: 'bounce 2s infinite'
+            }}>
+              ⚽
+            </div>
+            
+            <h2 style={{ 
+              color: '#FFD700', 
+              fontSize: '2rem', 
+              marginBottom: '20px',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+            }}>
+              🎮 PRÊT À JOUER ? 🎮
+            </h2>
+            
+            <div style={{
+              background: 'linear-gradient(45deg, rgba(255, 215, 0, 0.2), rgba(255, 165, 0, 0.2))',
+              padding: '20px',
+              borderRadius: '15px',
+              marginBottom: '25px',
+              border: '1px solid rgba(255, 215, 0, 0.5)'
+            }}>
+              <p style={{ 
+                fontSize: '1.3rem', 
+                marginBottom: '15px',
+                lineHeight: '1.6'
+              }}>
+                🎯 <strong>OBJECTIF :</strong> Gardez le ballon en l'air !<br/>
+                👆 <strong>CONTRÔLES :</strong> Cliquez sur le ballon pour le faire rebondir<br/>
+                🏆 <strong>DÉFI :</strong> Évitez que le ballon touche le sol !
+              </p>
+            </div>
+            
+            <button
+              onClick={startGame}
+              style={{
+                fontSize: '1.8rem',
+                padding: '20px 40px',
+                background: 'linear-gradient(45deg, #4CAF50, #45a049)',
+                color: 'white',
+                border: '3px solid #2E7D32',
+                borderRadius: '15px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)',
+                fontWeight: 'bold',
+                letterSpacing: '1px',
+                textTransform: 'uppercase'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 10px 25px rgba(76, 175, 80, 0.6)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                e.currentTarget.style.boxShadow = '0 6px 20px rgba(76, 175, 80, 0.4)';
+              }}
+            >
+              🚀 COUP D'ENVOI ! 🚀
+            </button>
+            
+            <div style={{
+              marginTop: '20px',
+              fontSize: '1rem',
+              opacity: 0.8,
+              fontStyle: 'italic'
+            }}>
+              ⭐ Montrez vos talents de jongleur ! ⭐
+            </div>
+          </div>
+        )}
+
+        {gameState === 'gameOver' && (
+          <div style={{ 
+            textAlign: 'center', 
+            marginBottom: '30px',
+            padding: '30px',
+            background: 'linear-gradient(45deg, #d32f2f, #f44336)',
+            borderRadius: '20px',
+            border: '3px solid #ff6b6b',
+            maxWidth: '500px',
+            boxShadow: '0 10px 25px rgba(211, 47, 47, 0.5)'
+          }}>
+            <div style={{ fontSize: '3rem', marginBottom: '15px' }}>🏁</div>
+            <h2 style={{ marginBottom: '15px', fontSize: '2rem', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              MATCH TERMINÉ !
+            </h2>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              padding: '15px',
+              borderRadius: '10px',
+              marginBottom: '20px'
+            }}>
+              <p style={{ fontSize: '1.5rem', marginBottom: '10px', fontWeight: 'bold' }}>
+                🏆 Score final: {score} point{score !== 1 ? 's' : ''}
+              </p>
+              <p style={{ marginBottom: '0', fontSize: '1.1rem' }}>
+                {score === 0 && "🔥 Échauffement terminé ! Essayez encore !"}
+                {score > 0 && score < 5 && "👍 Bon début ! Continuez l'entraînement !"}
+                {score >= 5 && score < 10 && "🎉 Bien joué ! Vous progressez !"}
+                {score >= 10 && score < 20 && "⭐ Excellent contrôle du ballon !"}
+                {score >= 20 && "🏆 LÉGENDE DU FOOTBALL ! Champion !"}
+              </p>
+            </div>
+            <button
+              onClick={restartGame}
+              style={{
+                fontSize: '1.5rem',
+                padding: '15px 30px',
+                background: 'linear-gradient(45deg, #4CAF50, #45a049)',
+                color: 'white',
+                border: '2px solid #2E7D32',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                fontWeight: 'bold'
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.5)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+              }}
+            >
+              🔄 NOUVELLE PARTIE
+            </button>
+          </div>
+        )}
+
+        <canvas
+          ref={canvasRef}
+          width={CANVAS_WIDTH}
+          height={CANVAS_HEIGHT}
+          onClick={handleCanvasClick}
+          style={{
+            border: '4px solid #FFD700',
+            borderRadius: '15px',
+            cursor: gameState === 'playing' ? 'pointer' : 'default',
+            boxShadow: '0 12px 24px rgba(0,0,0,0.6)',
+            backgroundColor: '#87CEEB',
+            maxWidth: '100%',
+            height: 'auto'
+          }}
+        />
+
+        {gameState === 'playing' && (
+          <div style={{
+            marginTop: '25px',
+            textAlign: 'center',
+            fontSize: '1.2rem',
+            padding: '15px 25px',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            borderRadius: '12px',
+            border: '2px solid rgba(255, 215, 0, 0.5)',
+            maxWidth: '400px'
+          }}>
+            <div style={{ marginBottom: '8px', fontSize: '1.5rem' }}>⚡</div>
+            <div style={{ color: '#FFD700', fontWeight: 'bold' }}>
+              Cliquez sur le ballon pour le faire rebondir !
+            </div>
+          </div>
+        )}
       </div>
 
-      {gameState === 'waiting' && (
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <p style={{ fontSize: '1.2rem', marginBottom: '15px' }}>
-            🎯 Cliquez sur le ballon pour le faire rebondir !<br/>
-            🎮 Évitez qu'il touche le sol pour continuer à marquer des points !
-          </p>
-          <button
-            onClick={startGame}
-            style={{
-              fontSize: '1.5rem',
-              padding: '15px 30px',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
-          >
-            🚀 Commencer à jouer
-          </button>
-        </div>
-      )}
-
-      {gameState === 'gameOver' && (
-        <div style={{ 
-          textAlign: 'center', 
-          marginBottom: '20px',
-          padding: '20px',
-          backgroundColor: '#d32f2f',
-          borderRadius: '10px',
-          border: '2px solid #ff6b6b'
-        }}>
-          <h2 style={{ marginBottom: '10px' }}>🏁 Partie Terminée !</h2>
-          <p style={{ fontSize: '1.3rem', marginBottom: '15px' }}>
-            Score final: {score} point{score !== 1 ? 's' : ''}
-          </p>
-          <p style={{ marginBottom: '15px' }}>
-            {score === 0 && "Essayez encore ! 💪"}
-            {score > 0 && score < 5 && "Pas mal pour un début ! 👍"}
-            {score >= 5 && score < 10 && "Bon travail ! 🎉"}
-            {score >= 10 && score < 20 && "Excellent jonglage ! ⭐"}
-            {score >= 20 && "Vous êtes un champion ! 🏆"}
-          </p>
-          <button
-            onClick={restartGame}
-            style={{
-              fontSize: '1.3rem',
-              padding: '12px 25px',
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#45a049'}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#4CAF50'}
-          >
-            🔄 Rejouer
-          </button>
-        </div>
-      )}
-
-      <canvas
-        ref={canvasRef}
-        width={CANVAS_WIDTH}
-        height={CANVAS_HEIGHT}
-        onClick={handleCanvasClick}
-        style={{
-          border: '3px solid #FFD700',
-          borderRadius: '10px',
-          cursor: gameState === 'playing' ? 'pointer' : 'default',
-          boxShadow: '0 8px 16px rgba(0,0,0,0.4)',
-          backgroundColor: '#87CEEB'
-        }}
-      />
-
-      {gameState === 'playing' && (
-        <div style={{
-          marginTop: '20px',
-          textAlign: 'center',
-          fontSize: '1.1rem',
-          opacity: 0.8
-        }}>
-          💡 Astuce: Cliquez sur le ballon pour le faire rebondir !
-        </div>
-      )}
+      {/* Animations CSS */}
+      <style>{`
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateY(0);
+          }
+          40% {
+            transform: translateY(-10px);
+          }
+          60% {
+            transform: translateY(-5px);
+          }
+        }
+      `}</style>
     </div>
   );
 };
