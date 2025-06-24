@@ -312,14 +312,6 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
             maxWidth: '600px',
             boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
           }}>
-            <div style={{
-              fontSize: '4rem',
-              marginBottom: '20px',
-              animation: 'bounce 2s infinite'
-            }}>
-              ⚽
-            </div>
-            
             <h2 style={{ 
               color: '#FFD700', 
               fontSize: '2rem', 
@@ -347,6 +339,16 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
               </p>
             </div>
             
+            {/* Ballon animé */}
+            <div style={{
+              fontSize: '4rem',
+              marginBottom: '25px',
+              animation: 'bounce 2s infinite'
+            }}>
+              ⚽
+            </div>
+            
+            {/* Bouton maintenant placé APRÈS le ballon */}
             <button
               onClick={startGame}
               style={{
@@ -361,7 +363,8 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
                 boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)',
                 fontWeight: 'bold',
                 letterSpacing: '1px',
-                textTransform: 'uppercase'
+                textTransform: 'uppercase',
+                marginBottom: '20px'
               }}
               onMouseOver={(e) => {
                 e.currentTarget.style.transform = 'translateY(-3px) scale(1.05)';
@@ -376,7 +379,6 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
             </button>
             
             <div style={{
-              marginTop: '20px',
               fontSize: '1rem',
               opacity: 0.8,
               fontStyle: 'italic'
