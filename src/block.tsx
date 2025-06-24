@@ -102,12 +102,18 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     const clickX = (event.clientX - rect.left) * scaleX;
     const clickY = (event.clientY - rect.top) * scaleY;
 
-    // Vérifier si le clic est sur le ballon
+    // Vérifier si le clic est sur le ballon - Zone de clic plus généreuse
+    // et s'assurer que le ballon n'a pas encore touché le sol
     const distance = Math.sqrt(
       Math.pow(clickX - ball.x, 2) + Math.pow(clickY - ball.y, 2)
     );
 
-    if (distance <= ball.radius + 20) { // Zone de clic un peu plus large
+    // Le ballon est cliquable tant qu'il n'a pas touché le sol ET qu'on clique dans sa zone
+    // Zone de clic élargie pour une meilleure jouabilité
+    const clickRadius = ball.radius + 30; // Zone de clic plus large
+    const ballHasTouchedGround = (ball.y + ball.radius) >= GROUND_Y;
+
+    if (distance <= clickRadius && !ballHasTouchedGround) {
       // Calculer la direction horizontale - INVERSÉE pour plus de réalisme
       // Si on clique à gauche du centre (horizontalOffset < 0), le ballon part à droite (+)
       // Si on clique à droite du centre (horizontalOffset > 0), le ballon part à gauche (-)
@@ -121,7 +127,7 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
       }));
       setScore(prevScore => prevScore + 1);
     }
-  }, [gameState, ball.x, ball.y, ball.radius, canvasSize]);
+  }, [gameState, ball.x, ball.y, ball.radius, canvasSize, GROUND_Y]);
 
   // Animation du jeu
   useEffect(() => {
@@ -141,8 +147,10 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
         // Appliquer l'amortissement horizontal pour plus de réalisme
         newBall.velocityX *= HORIZONTAL_DAMPING;
 
-        // Vérifier si le ballon touche le sol
+        // Vérifier si le ballon touche le sol - vérification plus précise
         if (newBall.y + newBall.radius >= GROUND_Y) {
+          // S'assurer que le ballon est exactement sur le sol
+          newBall.y = GROUND_Y - newBall.radius;
           setGameState('gameOver');
           // Envoyer l'événement de completion du jeu
           window.postMessage({ 
@@ -254,6 +262,18 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     }
     
     ctx.restore();
+
+    // Dessiner un indicateur visuel de la zone de clic si le jeu est en cours
+    // et si le ballon est proche du sol pour aider le joueur
+    if (gameState === 'playing' && (ball.y + ball.radius) > (GROUND_Y - 100)) {
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius + 30, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
 
     // Afficher un indicateur visuel de la direction si le ballon bouge horizontalement
     if (gameState === 'playing' && Math.abs(ball.velocityX) > 0.5) {
