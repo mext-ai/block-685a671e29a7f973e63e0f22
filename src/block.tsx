@@ -108,9 +108,11 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
     );
 
     if (distance <= ball.radius + 20) { // Zone de clic un peu plus large
-      // Calculer la direction horizontale basée sur où on clique par rapport au centre du ballon
+      // Calculer la direction horizontale - INVERSÉE pour plus de réalisme
+      // Si on clique à gauche du centre (horizontalOffset < 0), le ballon part à droite (+)
+      // Si on clique à droite du centre (horizontalOffset > 0), le ballon part à gauche (-)
       const horizontalOffset = clickX - ball.x; // Distance du clic par rapport au centre du ballon
-      const horizontalForce = (horizontalOffset / ball.radius) * MAX_HORIZONTAL_VELOCITY;
+      const horizontalForce = -(horizontalOffset / ball.radius) * MAX_HORIZONTAL_VELOCITY; // INVERSÉ avec le signe -
       
       setBall(prevBall => ({
         ...prevBall,
@@ -422,7 +424,7 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
             }}>
               🎯 <strong>OBJECTIF :</strong> Gardez le ballon en l'air !<br/>
               👆 <strong>CONTRÔLES :</strong> Cliquez sur le ballon pour le faire rebondir<br/>
-              🎮 <strong>TECHNIQUE :</strong> Cliquez à gauche/droite du centre pour diriger le ballon<br/>
+              🎮 <strong>TECHNIQUE :</strong> Frappez le côté gauche → ballon va à droite<br/>
               🏆 <strong>DÉFI :</strong> Évitez que le ballon touche le sol !
             </p>
           </div>
@@ -571,7 +573,7 @@ const Block: React.FC<BlockProps> = ({ title = "Jeu de Jonglage" }) => {
         }}>
           <div style={{ marginBottom: '8px', fontSize: '1.5rem' }}>⚡</div>
           <div style={{ color: '#FFD700', fontWeight: 'bold' }}>
-            Cliquez à gauche/droite du centre pour diriger le ballon !
+            Frappez le côté gauche → ballon va à droite !
           </div>
         </div>
       )}
